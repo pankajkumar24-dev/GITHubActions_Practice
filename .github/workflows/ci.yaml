@@ -68,3 +68,4 @@ jobs:
           Start-Website -Name "MyApp"
 
           Write-Host "IIS deployment completed."
+          Write-Host "IIS deployment completed............"
