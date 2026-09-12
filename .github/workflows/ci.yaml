@@ -57,15 +57,27 @@ jobs:
 
           Import-Module WebAdministration
 
+          Write-Host "Stopping website..."
           Stop-Website -Name "MyApp"
 
+          Write-Host "Stopping application pool..."
+          Stop-WebAppPool -Name "DefaultAppPool"
+
+          Write-Host "Waiting for IIS..."
+          Start-Sleep -Seconds 5
+
+          Write-Host "Cleaning old files..."
           Remove-Item "C:\inetpub\wwwroot\MyApp\*" -Recurse -Force
 
+          Write-Host "Copying new files..."
           Copy-Item ".\deploy\*" `
             "C:\inetpub\wwwroot\MyApp" `
             -Recurse -Force
 
+          Write-Host "Starting application pool..."
+          Start-WebAppPool -Name "DefaultAppPool"
+
+          Write-Host "Starting website..."
           Start-Website -Name "MyApp"
 
-          Write-Host "IIS deployment completed."
-          Write-Host "IIS deployment completed............"
+          Write-Host "Deployment completed successfully!"
