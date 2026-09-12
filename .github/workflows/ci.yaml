@@ -1,4 +1,4 @@
-name: .NET CI Pipeline
+name: .NET CI/CD Pipeline
 
 on:
   push:
@@ -35,3 +35,36 @@ jobs:
         with:
           name: MyApp
           path: ./publish
+
+           # =========================
+  # CD
+  # =========================
+  deploy:
+    needs: build
+    runs-on: self-hosted
+
+    steps:
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: MyApp
+          path: ./deploy
+
+      - name: Deploy to IIS
+        shell: powershell
+        run: |
+          Write-Host "Starting IIS deployment..."
+
+          Import-Module WebAdministration
+
+          Stop-Website -Name "MyApp"
+
+          Remove-Item "C:\inetpub\wwwroot\MyApp\*" -Recurse -Force
+          Copy-Item ".\deploy\*" 
+            "C:\inetpub\wwwroot\MyApp" 
+            -Recurse -Force
+
+          Start-Website -Name "MyApp"
+
+          Write-Host "IIS deployment completed."
