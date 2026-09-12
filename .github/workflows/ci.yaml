@@ -57,26 +57,47 @@ jobs:
 
           Import-Module WebAdministration
 
-          Write-Host "Stopping website..."
-          Stop-Website -Name "MyApp"
+          # Stop website if running
+          $site = Get-Website -Name "MyApp"
 
-          Write-Host "Stopping application pool..."
-          Stop-WebAppPool -Name "DefaultAppPool"
+          if ($site.State -eq "Started") {
+              Write-Host "Stopping website..."
+              Stop-Website -Name "MyApp"
+          }
+          else {
+              Write-Host "Website is already stopped."
+          }
 
+          # Stop application pool if running
+          $pool = Get-WebAppPoolState -Name "DefaultAppPool"
+
+          if ($pool.Value -eq "Started") {
+              Write-Host "Stopping application pool..."
+              Stop-WebAppPool -Name "DefaultAppPool"
+          }
+          else {
+              Write-Host "Application pool is already stopped."
+          }
+
+          # Give IIS time to release files
           Write-Host "Waiting for IIS..."
           Start-Sleep -Seconds 5
 
-          Write-Host "Cleaning old files..."
+          # Remove old files
+          Write-Host "Removing old application files..."
           Remove-Item "C:\inetpub\wwwroot\MyApp\*" -Recurse -Force
 
-          Write-Host "Copying new files..."
+          # Copy new artifact
+          Write-Host "Copying new application files..."
           Copy-Item ".\deploy\*" `
             "C:\inetpub\wwwroot\MyApp" `
             -Recurse -Force
 
+          # Start application pool
           Write-Host "Starting application pool..."
           Start-WebAppPool -Name "DefaultAppPool"
 
+          # Start website
           Write-Host "Starting website..."
           Start-Website -Name "MyApp"
 
