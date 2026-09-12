@@ -44,7 +44,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
@@ -52,7 +51,7 @@ jobs:
           path: ./deploy
 
       - name: Deploy to IIS
-        shell: powershell
+        shell: powershell -ExecutionPolicy Bypass -File "{0}"
         run: |
           Write-Host "Starting IIS deployment..."
 
@@ -61,8 +60,9 @@ jobs:
           Stop-Website -Name "MyApp"
 
           Remove-Item "C:\inetpub\wwwroot\MyApp\*" -Recurse -Force
-          Copy-Item ".\deploy\*" 
-            "C:\inetpub\wwwroot\MyApp" 
+
+          Copy-Item ".\deploy\*" `
+            "C:\inetpub\wwwroot\MyApp" `
             -Recurse -Force
 
           Start-Website -Name "MyApp"
