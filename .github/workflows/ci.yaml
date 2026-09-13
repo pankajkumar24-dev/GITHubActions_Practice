@@ -94,7 +94,7 @@ jobs:
             -Recurse -Force
 
           # Start application pool
-          Write-Host "Starting application pool..."
+          Write-Host "Starting application pool....."
           Start-WebAppPool -Name "DefaultAppPool"
 
           # Start website
